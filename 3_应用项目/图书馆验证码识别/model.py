@@ -6,3 +6,6 @@ class VerificationCodeModule(nn.Module):
 
     def forward(self, x):
         pass
+
+    
+    
