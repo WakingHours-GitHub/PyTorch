@@ -3,7 +3,7 @@ import torch.nn as nn
 
 # from main import BATCH_SIZE
 
-BATCH_SIZE = 500
+BATCH_SIZE = 100
 
 
 class VerificationCodeModule(nn.Module):

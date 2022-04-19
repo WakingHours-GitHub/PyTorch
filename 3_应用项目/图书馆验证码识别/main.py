@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader, Dataset
 from model import *
 
 # BATCH_SIZE = 1
-LEARN_RATE = 0.1
+LEARN_RATE = 0.01
 EPOCH = 100
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -60,7 +60,8 @@ def get_dataloader(istrain: bool = True):
     )
     # 测试正常, 可以进行遍历
 
-def calculate_accuracy(y_pred:torch.Tensor, label:torch.Tensor):
+
+def calculate_accuracy(y_pred: torch.Tensor, label: torch.Tensor):
     """
 
     :param y_pred: [bz, 40]
@@ -71,13 +72,10 @@ def calculate_accuracy(y_pred:torch.Tensor, label:torch.Tensor):
     # print(torch.argmax(y_pred, dim=2))
     # print(torch.argmax(label, dim=2))
     acc = torch.all(
-        torch.argmax(y_pred, dim=2)==torch.argmax(label, dim=2),
+        torch.argmax(y_pred, dim=2) == torch.argmax(label, dim=2),
         dim=1
     ).float().mean()
     return acc
-
-
-
 
 
 def train(isload: bool = True):
@@ -96,10 +94,12 @@ def train(isload: bool = True):
         model = SimpleModule()
     # 最后都需要进行to(device)
     model.to(device)
+    model.train()  # 开启训练模式
 
     # 准备损失函数:
     # loss_fn = torch.nn.CrossEntropyLoss()
     loss_fn = torch.nn.CrossEntropyLoss()
+    # loss_fn = torch.nn.
     loss_fn.to(device)
 
     # 准备优化器
@@ -116,19 +116,24 @@ def train(isload: bool = True):
             # 使用定义的模型进行预测
             y_pred = model(img)
             acc = calculate_accuracy(y_pred, label)
+            # print(label.shape)
 
-            label = nn.Flatten()(label)
 
-            # 使用loss_fn计算loss
+            # y_pred = torch.reshape(y_pred, shape=(BATCH_SIZE, 4, 10)).float()
+            # y_pred = torch.argmax(y_pred, dim=2).float()
+            # label = torch.argmax(label, dim=2).float()
+
+            # 使用loss_fn计算loss, loss是一组组合
             loss = loss_fn(y_pred, label)
 
             SGD.zero_grad()  # 清空梯度
-            loss.backward()  # 反向传播
+            loss.requires_grad_(True)
+            loss.backward()  # 反向传播, 计算梯度.
             SGD.step()  # update parameters
 
             print("index:{}, loss_value: {}, accuracy:{}".format(idx, loss.item(), acc))
             # break
-        torch.save(model, load_model       )
+        torch.save(model, load_model)
 
 
 if __name__ == '__main__':
