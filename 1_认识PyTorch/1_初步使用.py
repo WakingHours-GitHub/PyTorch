@@ -4,4 +4,6 @@ import torch
 print("PyTorch version: ", torch.__version__)
 
 # 查看是否支持GPU
-print("GOU:", torch.cuda.is_available())
+print("GPU:", torch.cuda.is_available())
+
+

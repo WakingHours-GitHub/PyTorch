@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import Dataset, DataLoader
 import cv2 as cv
+# 使用cv读取进来的数据, 底层是ndarray
 import os
 
 # Dataset?? 直接打印官方说明
@@ -9,6 +10,7 @@ import os
 常用的数据集分为两种, 
 一种是分类的, 不同类别的数据集放在不同的文件夹中
 或者是将数据集放在一个文件夹中, 将标签放在另一个文件夹, 中间通过某种形式进行对应.
+或者是对于图片来说, 文件名就对应label. 
 
 首先我们看一下Dataset:
 class Dataset(Generic[T_co]):
@@ -28,8 +30,9 @@ class Dataset(Generic[T_co]):
 """
 
 
-class MyDataset(Dataset):
+class MyDataset(Dataset): # 继承关系. 
     def __init__(self, train: bool = True, img_type: str = None):
+        """用于存放一些全局变量, 后面中会用到"""
         if img_type not in ["ants", "bees"]:
             print("error, parm: \"img_type\", should is ants or bees")
             raise RuntimeError  # 报错
@@ -45,7 +48,8 @@ class MyDataset(Dataset):
         self.all_file_path = [os.path.join(self.all_file_root_path, file_path) for file_path in
                               os.listdir(self.all_file_root_path)]
 
-    def __getitem__(self, item):
+    def __getitem__(self, item): 
+        """这里item就是index, 用于返回对应索引的input(feature)和label(target)"""
         # 返回内容和标签
         return torch.tensor(cv.imread(self.all_file_path[item]), dtype=torch.float32), self.img_type  # 返回内容和标签
 

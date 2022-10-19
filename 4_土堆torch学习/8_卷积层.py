@@ -15,15 +15,18 @@ from torch.utils.tensorboard import SummaryWriter
 #     bias=torch.norm()
 # )
 
+# torch.nn.functional.conv2d():
 # functional.conv2d(
 #     input=, # 表示输入的Tensor, 并且输入Tensor的形状应该是: (minibatch, in_channels, iH, iw)
-#     weight=, # 就是卷积核 -> (out_channels, in_channels, kH, kW)
-#     bias= , # 就是偏置
+#     weight=, # 就是卷积核 -> (out_channels, in_channels, kH, kW), out_channels: 实际就是卷积核个数. in_channels: 就是输入的通道数.
+#     bias= , # 就是偏置 -> (ont_channels) 有多少个卷积核就有多少个bias
 #     stride=, #  就是在横向和竖向的步长, (sH, sW)
-#     padding=, # 在图像的周围进行填充, 填充有多大. 默认不填充, 默认是为0.
+#     padding=, # 在图像的周围进行填充, 填充有多大. 默认不填充, 如果填充, 默认是为0.
 #
 # )
 """
+
+介绍卷积层的使用: 
 torch.nn是将torch.nn.functional封装起来的, 是更高级的API
 为了更加了解底层, 我们来看看torch.nn.functional中的Con2d是如何去做的吧
 
@@ -33,17 +36,18 @@ torch.nn是将torch.nn.functional封装起来的, 是更高级的API
         in_channels, # 输入的通道数, 单通道: 1, RGB通道: 3
         out_channels, # 输出的通道数, 实际上就是卷积核的个数
                 # 理解: 就是不同的卷积核, 去看图片, 得到的结果也是不同的
-                # -> 不同的视角,
+                # 也就是 -> 不同的视角, 最后输出的就是多个卷积核看到的结果, 成一组batch
         kernel_size, # 卷积核大小, 自动设置其中的数值, 满足二维高斯分布, 在训练过程中调整
         stride=1, # 步长
         padding=0, # 边缘填充
         dilation=1, # 卷积核对应距离
-        groups=1, # 分组卷积
+        groups=1, # 分组卷积, 一般设置为1
         bias=True, # 是否加上偏置
         padding_mode='zeros', #  填充方式
         device=None, 
         dtype=None
     )
+    
     parameters:
         in_channels (int) – Number of channels in the input image
         out_channels (int) – Number of channels produced by the convolution
@@ -159,7 +163,7 @@ def test01() -> None:
     )
     kernel = torch.reshape(
         input=kernel,
-        shape=(1, 1, 3, 3)
+        shape=(1, 1, 3, 3) # out=1, 也就是只有一个卷积核.
     )
 
     output = functional.conv2d(
@@ -192,8 +196,8 @@ def test01() -> None:
         input=input,
         weight=kernel,
         bias=None,
-        stride=2,
-        padding=1
+        stride=2, # int or tuple(int) # 设立设置为2, 就是横和竖步长都设置为2.
+        padding=1 # 同理. 周围设置为1.
     )
     print(output3)
 
