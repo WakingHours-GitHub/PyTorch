@@ -1,4 +1,7 @@
 """
+池化层: pooling layers
+
+
 最大池化的作用:
 最大池化也被称之为下采样:
 
@@ -14,7 +17,7 @@ padding – Implicit negative infinity padding to be added on both sides, must b
 dilation – The stride between elements within a sliding window, must be > 0.
     dilation: 就是差距, 也就是进行卷积操作时, 是需要进行乘积的, 那么dilation就表示原图像卷积时候的距离 -> 空洞卷积
 ceil_mode – If True, will use ceil instead of floor to compute the output shape. This ensures that every element in the input tensor is covered by a sliding window.
-    是否保留? 就是向上取整, 还是向下取整. 当越过边界时
+    是ceil还是follow模式 -> 是否保留? 就是向上取整, 还是向下取整. 当越过边界时, 为True, 则保留边界. 如果为False则不保留边界.
 return_indices – If True, will return the argmax along with the max values. Useful for torch.nn.functional.max_unpool2d later
 
 那么池化到底是做什么的?

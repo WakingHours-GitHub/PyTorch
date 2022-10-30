@@ -42,20 +42,20 @@ torch.nn是将torch.nn.functional封装起来的, 是更高级的API
         padding=0, # 边缘填充
         dilation=1, # 卷积核对应距离
         groups=1, # 分组卷积, 一般设置为1
-        bias=True, # 是否加上偏置
+        bias=True, # 是否加上偏置，一个卷积对应一个偏执.
         padding_mode='zeros', #  填充方式
         device=None, 
         dtype=None
     )
     
-    parameters:
+    parameters: 一些具体参数: 
         in_channels (int) – Number of channels in the input image
         out_channels (int) – Number of channels produced by the convolution
         kernel_size (int or tuple) – Size of the convolving kernel
         stride (int or tuple, optional) – Stride of the convolution. Default: 1
         padding (int, tuple or str, optional) – Padding added to all four sides of the input. Default: 0
         padding_mode (string, optional) – 'zeros', 'reflect', 'replicate' or 'circular'. Default: 'zeros'
-        dilation (int or tuple, optional) – Spacing between kernel elements. Default: 1
+        dilation (int or tuple, optional) – Spacing between kernel elements. Default: 1, 卷积核内部距离, 空洞卷积.
         groups (int, optional) – Number of blocked connections from input channels to output channels. Default: 1
         bias (bool, optional) – If True, adds a learnable bias to the output. Default: True
 """
@@ -65,7 +65,7 @@ class MyConv2d(nn.Module):
     def __init__(self):
         super(MyConv2d, self).__init__()  # 注意, 在生成自己的module时, 需要调用super
 
-        self.conv1 = nn.Conv2d(
+        self.conv1 = nn.Conv2d( # 定义卷积层.
             in_channels=3,
             out_channels=6,  # 输出通道, 也就是多少个卷积核
             # 注意, 对于, size和stride是需要tuple, 所以就算是写一个数字也需要是使用元组
@@ -77,7 +77,7 @@ class MyConv2d(nn.Module):
         )
 
     def forward(self, x):
-        x = self.conv1(x)
+        x = self.conv1(x) # 就是仅经过一层卷积层.
         return x
 
 
@@ -89,8 +89,8 @@ def test02() -> None:
     """
     dataset = datasets.CIFAR10(
         root="CIFAR10_data",
-        train=False,  # 取出少量数据
-        transform=torchvision.transforms.ToTensor(),
+        train=False,  # 要测试集, 取少量数据
+        transform=torchvision.transforms.ToTensor(), # 都转换为Tensor
         download=False
     )
     dataloader = DataLoader(
@@ -99,17 +99,19 @@ def test02() -> None:
         shuffle=True
     )
 
-    with SummaryWriter("8_logs") as writer:
+    with SummaryWriter("8_logs") as writer: # 使用上下文管理器
         for idx, (img, label) in enumerate(dataloader):
             print("img: ", img.shape)  # img:  torch.Size([64, 3, 32, 32])
             # 经过卷积层处理:
             img_conv2d = MyConv2d()(img)  # 返回的结果就是经过forward处理后的结果
             print("img_conv2d: ", img_conv2d.shape) # img_conv2d:  torch.Size([64, 6, 30, 30])
             # 可见, 经过卷积层后的图像大小
+            # 可以见, 首先是out_channel变为了6, 但是经过卷积操作后, 图像的宽, 高变小.
+
             writer.add_images("source_img", img, idx)
             img_conv2d = torch.reshape(img_conv2d, shape=(-1, 3, img_conv2d.size(2), img_conv2d.size(-1)))
             writer.add_images("conv2d_img", img_conv2d, idx)
-            # 注意这里会报错, 因为conv2d处理完后的img_conv2d, channel为6, 不是3,
+            # 注意这里会报错, 因为conv2d处理完后的img_conv2d, channel为6, 不是3, 所以无法在Tensorboard中进行显示.
             # 所以我们这里做一个不严谨的操作: reshape以下, 这样img_conv2d就会被拉伸
             break  # 只看一轮就行
 
@@ -202,7 +204,7 @@ def test01() -> None:
     print(output3)
 
     # 卷积计算公式:
-    # new_H = [(H+2*padding)/stride + 1]向下取整
+    # new_H = [(H+2*padding)-K/stride + 1]向下取整
     # 即N = (W-F+2P)/S + 1 然后向下取整
 
     return None
