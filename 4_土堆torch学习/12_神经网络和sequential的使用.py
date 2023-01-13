@@ -82,7 +82,8 @@ class MyModule(nn.Module):
         # x: [batch_size, 64, 4, 4]
 
         # 目前为止图像是: x: [batch_size, 64, 4, 4]
-        self.flatten = Flatten() # 和torch.flotten()一样
+        self.flatten = nn.Flatten() # 和torch.flotten()一样
+        # 只对dim=1(包括)以后的维度进行平坦.
 
         # 到这里时, 输入图像已经是:
         # 线性层也称之为全连接层.
@@ -140,7 +141,7 @@ class SequentialModule(nn.Module):
             Flatten(),
             Linear(64*4*4, 64),
             Linear(64, 10) #
-            # 这样我们的序贯模型就定义完了.
+            # 这样我们的序贯模型就定义完了. # 但是其中, 我们一定注意我们输入的形状变化.
         )
 
     def forward(self, x):
@@ -149,7 +150,8 @@ class SequentialModule(nn.Module):
 
 def test03():
     """
-    使用连续序贯模型, 进行简单的测试
+    使用连续序贯模型, 进行简单的测试.
+    我们定义好各个层的网络, 然后模型就会自动按照顺序执行我们的模型,forward
 
     :return:
     """
@@ -230,9 +232,9 @@ def test01():
     print(output.size()) # torch.Size([64, 10]) # 说明正确
 
 
-    # 我们也可以使用tensorboard进行可视化
+    # 我们也可以使用tensorboard进行 网络模型的 可视化    
     with SummaryWriter("12_logs") as writer:
-        writer.add_graph(
+        writer.add_graph( # 增加计算图. 
             model=MyModule(), # 放入模型 # 将
             input_to_model=input, # 模型的输入变量
         )
